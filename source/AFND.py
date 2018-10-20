@@ -55,6 +55,7 @@ class AFND:
             if er_splitted[1] not in ["*", "|", "."]:
                 self.kleen_expression(init_state, "".join(er_splitted[1:]))
             else:
+                pass
 
         elif er_splitted[0] is "|":
             pass
