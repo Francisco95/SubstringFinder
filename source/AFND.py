@@ -1,16 +1,13 @@
 from collections import defaultdict
-import numpy as np
+from source.reader import ERReader, _ALPHABET
+from source.automata import Automaton
 
-class AFND:
+
+class AFND(Automaton):
     def __init__(self, alphabet):
-        self.states = [0, 1]
-        self.alphabet = alphabet
-        self.transitions = {}
-        self.init_state = 0
-        self.end_state = 1
-
-    def last_state(self):
-        return self.states[-1]
+        super().__init__([0, 1], defaultdict(list), 0)
+        self.set_alphabet(alphabet)
+        self.add_end_state(1)
 
     def new_states(self, n):
         r = []
@@ -19,59 +16,100 @@ class AFND:
             r.append(self.last_state())
         return r
 
-    def new_connection(self, node1, literal, node2):
-        self.transitions[(node1, literal)] = node2
-
-    def or_expresion(self, init_state, er1, end_state, er2):
+    def or_expression(self, init_state, er1, end_state, er2):
         news = self.new_states(4)
-        self.new_connection(init_state, "", news[0])
-        self.new_connection(init_state, "", news[1])
-        self.new_connection(news[2], "", end_state)
-        self.new_connection(news[3], "", end_state)
-        self.expresion_to_AFND(news[0], er1, news[2])
-        self.expresion_to_AFND(news[1], er2, news[3])
+        self.new_connection(init_state, ERReader("_"), news[0])
+        self.new_connection(init_state, ERReader("_"), news[1])
+        self.new_connection(news[2], ERReader("_"), end_state)
+        self.new_connection(news[3], ERReader("_"), end_state)
+        self.expression_to_afnd(news[0], er1, news[2])
+        self.expression_to_afnd(news[1], er2, news[3])
 
-    def and_expresion(self, init_state, er1, end_state, er2):
+    def and_expression(self, init_state, er1, end_state, er2):
         news = self.new_states(1)
-        self.expresion_to_AFND(init_state, er1, news[0])
-        self.expresion_to_AFND(news[0], er2, end_state)
+        self.expression_to_afnd(init_state, er1, news[0])
+        self.expression_to_afnd(news[0], er2, end_state)
 
     def kleen_expression(self, init_state, er, end_state):
         news = self.new_states(2)
-        self.new_connection(init_state, "", news[0])
-        self.new_connection(news[1], "", end_state)
-        self.new_connection(news[1], "", news[0])
-        self.new_connection(init_state, "", end_state)
-        self.expresion_to_AFND(news[0], er, news[1])
+        self.new_connection(init_state, ERReader("_"), news[0])
+        self.new_connection(init_state, ERReader("_"), end_state)
+        self.new_connection(news[1], ERReader("_"), end_state)
+        self.new_connection(news[1], ERReader("_"), news[0])
+        self.expression_to_afnd(news[0], er, news[1])
 
     def add_initial_loops(self):
         for literal in self.alphabet:
             self.new_connection(self.init_state, literal, self.init_state)
 
-    def expresion_to_AFND(self, init_state, er, end_state):
-        er_splitted = list(er)
-        # inside_er = "".join(er_splitted[1:])
-        if er_splitted[0] is "*":
-            if er_splitted[1] not in ["*", "|", "."]:
-                self.kleen_expression(init_state, "".join(er_splitted[1:]))
-            else:
-                pass
+    def expression_to_afnd(self, init_state, er: ERReader, end_state):
+        if er.char(0) is "*":
+            self.kleen_expression(init_state, er.read_kleen(), end_state)
 
-        elif er_splitted[0] is "|":
-            pass
-        elif er_splitted[0] is ".":
+        elif er.char(0) is "|":
+            er1, er2 = er.read_or()
+            self.or_expression(init_state, er1, end_state, er2)
+
+        elif er.char(0) is ".":
+            er1, er2 = er.read_and()
+            self.and_expression(init_state, er1, end_state, er2)
+        elif er.char(0) is "":
             pass
         else:
-            pass
+            self.new_connection(init_state, er, end_state)
+
+    def to_afd(self):
+        from source.AFD import AFD
+        return AFD(self.alphabet, afnd=self)
 
 
+class BackwardAFND(AFND):
+    def __init__(self, alphabet=""):
+        super().__init__(alphabet)
 
-class BackwardAFND:
-    def __init__(self):
-        pass
+    def backward(self, afnd: AFND):
+        #  swap the init state with the end state
+        self.end_states = [afnd.init_state]
+        self.init_state = afnd.end_states[0]
+        self.set_alphabet(afnd.alphabet)
+        self.states = afnd.states
+        self._backward_connections(afnd.transitions)
 
-    def backward_connections(self):
-        pass
+    def _backward_connections(self, transitions):
+        self.transitions = defaultdict(list)  # reset, just in case
+        for k, values in transitions.items():
+            # print(values)
+            for v in values:
+                # print(v)
+                if k[0] != v:  # this avoid the initial loops
+                    self.transitions[(v, k[1])].append(k[0])
 
-    def swap_init_end_state(self):
-        pass
+
+#  to test
+# c = "*|.ab..abc"
+# w = ERReader(c)
+# a = AFND(list("abc"))
+# a.expression_to_afnd(a.init_state, w, a.end_states[0])
+# a.add_initial_loops()
+# print("Transitions form")
+# print("(state_From, char_readed) -> state_to")
+# for k, v in a.transitions.items():
+#     for d in v:
+#         print("({}, {}) -> {}".format(k[0], str(k[1]), d))
+# print(":::now the reverse AFND")
+# ra = BackwardAFND()
+# ra.backward(a)
+# print("Transitions form")
+# print("(state_From, char_readed) -> state_to")
+# for k, v in ra.transitions.items():
+#     for d in v:
+#         print("({}, {}) -> {}".format(k[0], str(k[1]), d))
+
+# c = "|a..bab"
+# a = AFND(_ALPHABET)
+# w = ERReader(c)
+# a.expression_to_afnd(a.init_state, w, a.end_states[0])
+# a.add_initial_loops()
+# for k, v in a.transitions.items():
+#     for d in v:
+#         print("({}, {}) -> {}".format(k[0], str(k[1]), d))

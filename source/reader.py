@@ -1,9 +1,14 @@
-
+import string
 
 OP = ["*", "|", "."]
+_ALPHABET = list(string.ascii_lowercase +
+                 string.ascii_uppercase +
+                 string.digits +
+                 " " +
+                 "\n")
 
 
-class CharReader:
+class ERReader:
     def __init__(self, input_char):
         self.word = list(input_char)
         self.pointer = 0
@@ -37,7 +42,7 @@ class CharReader:
         if not self.valid():
             return self
         self.pointer += 1
-        return CharReader("".join(self.word[self.pointer:]))
+        return ERReader("".join(self.word[self.pointer:]))
 
     def read_or(self):
         if not self.valid():
@@ -45,16 +50,16 @@ class CharReader:
 
         self.pointer += 1
         second_string_init = self._search_valid_two_string()
-        return (CharReader("".join(self.word[self.pointer:second_string_init])),
-                CharReader("".join(self.word[second_string_init:])))
+        return (ERReader("".join(self.word[self.pointer:second_string_init])),
+                ERReader("".join(self.word[second_string_init:])))
 
     def read_and(self):
         if not self.valid():
             return self
         self.pointer += 1
         second_string_init = self._search_valid_two_string()
-        return (CharReader("".join(self.word[self.pointer:second_string_init])),
-                CharReader("".join(self.word[second_string_init:])))
+        return (ERReader("".join(self.word[self.pointer:second_string_init])),
+                ERReader("".join(self.word[second_string_init:])))
 
     def reset(self):
         self.pointer = 0
@@ -62,12 +67,16 @@ class CharReader:
     def valid(self):
         return len(self.word) > 1
 
+    def char(self, pos):
+        return self.word[pos]
+
     def __str__(self):
         return "".join(self.word)
 
 
+#  to test
 # c = "*|.ab..abc"
-# w = CharReader(c)
+# w = ERReader(c)
 #
 # c1 = w.read_kleen()
 # print("leido pirmer char, op kleen y da el substring:", c1)
@@ -79,4 +88,5 @@ class CharReader:
 # print("leido cuarto, op and y da 2 substr:", c6, c7)
 # c8, c9 = c6.read_and()
 # print("leido ultimo, op and y da 2 substr:", c8, c9)
+# print("-----------------")
 
