@@ -1,6 +1,5 @@
 from collections import defaultdict
 from source.AFND import AFND
-from source.reader import ERReader
 from source.automata import Automaton
 
 

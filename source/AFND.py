@@ -53,8 +53,6 @@ class AFND(Automaton):
         elif er.char(0) is ".":
             er1, er2 = er.read_and()
             self.and_expression(init_state, er1, end_state, er2)
-        elif er.char(0) is "":
-            pass
         else:
             self.new_connection(init_state, er, end_state)
 

@@ -13,13 +13,6 @@ class ERReader:
         self.word = list(input_char)
         self.pointer = 0
 
-    def _firs_next_char(self):
-        tmp_pointer = self.pointer
-        while self.word[tmp_pointer] in OP:
-            tmp_pointer += 1
-
-        return tmp_pointer
-
     def _search_valid_two_string(self):
         tmp_pointer = self.pointer
         need_to_read = 1
