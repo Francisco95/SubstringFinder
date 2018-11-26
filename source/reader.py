@@ -8,9 +8,27 @@ _ALPHABET = list(string.ascii_lowercase +
                  "\n")
 
 
+def _er_to_list(er: str):
+    extra = '\n'
+    tmps = []
+    if '\n' in er:
+        tmps = er.split("\n")
+    elif '\\n' in er:
+        tmps = er.split('\\n')
+    else:
+        tmps = [er]
+        extra = ""
+    r = []
+    r.extend(tmps[0])
+    for i in range(len(tmps)-1):
+        r.extend(extra)
+        r.extend(tmps[i+1])
+    return r
+
+
 class ERReader:
     def __init__(self, input_char):
-        self.word = list(input_char)
+        self.word = _er_to_list(input_char)
         self.pointer = 0
 
     def _search_valid_two_string(self):
@@ -65,21 +83,3 @@ class ERReader:
 
     def __str__(self):
         return "".join(self.word)
-
-
-#  to test
-# c = "*|.ab..abc"
-# w = ERReader(c)
-#
-# c1 = w.read_kleen()
-# print("leido pirmer char, op kleen y da el substring:", c1)
-# c2, c3 = c1.read_or()
-# print("leido segundo, op or y da 2 substring:", c2, c3)
-# c4, c5 = c2.read_and()
-# c6, c7 = c3.read_and()
-# print("leido tercer, op and y da 2 substr:", c4, c5)
-# print("leido cuarto, op and y da 2 substr:", c6, c7)
-# c8, c9 = c6.read_and()
-# print("leido ultimo, op and y da 2 substr:", c8, c9)
-# print("-----------------")
-
