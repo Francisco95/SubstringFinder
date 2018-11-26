@@ -4,11 +4,11 @@ from source.automata import Automaton
 
 
 def to_str(state: list):
-    return "".join(map(str, state))
+    return ",".join(map(str, state))
 
 
 def to_list(state: str):
-    return [int(x) for x in list(state)]
+    return list(map(int, state.split(",")))
 
 
 class AFD(Automaton):
@@ -63,29 +63,3 @@ class AFD(Automaton):
         self.init_state = self._get_init_state(a)
         self._update(a, self.init_state)
         self._construct(self.init_state, a)
-
-
-#  to test
-# c = "*|.ab..aba"
-# w = ERReader(c)
-# a = AFND(list("ab"))
-# a.expression_to_afnd(a.init_state, w, a.end_states[0])
-# a.add_initial_loops()
-# print("Transitions form")
-# print("(state_From, char_readed) -> state_to")
-# for k, v in a.transitions.items():
-#     for d in v:
-#         print("({}, {}) -> {}".format(k[0], str(k[1]), d))
-# print(":::::::::::::::::::::::::")
-# afd = AFD(list("ab"))
-# print(":::::::::::")
-# afd.from_afnd(a)
-# print(afd.states)
-# for k, v in afd.transitions.items():
-#     print(k, v)
-#
-# afd = a.to_afd()
-# print(afd.states)
-# for k, v in afd.transitions.items():
-#     print(k, v)
-
