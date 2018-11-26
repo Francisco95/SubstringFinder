@@ -19,7 +19,6 @@ class Automaton:
         return self.states[-1]
 
     def new_connection(self, state1, literal, state2):
-        # print(state1, literal, state2)
         self.transitions[(state1, str(literal))].append(state2)
 
     def add_end_state(self, state):

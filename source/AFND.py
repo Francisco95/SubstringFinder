@@ -76,38 +76,6 @@ class BackwardAFND(AFND):
     def _backward_connections(self, transitions):
         self.transitions = defaultdict(list)  # reset, just in case
         for k, values in transitions.items():
-            # print(values)
             for v in values:
-                # print(v)
                 if k[0] != v:  # this avoid the initial loops
                     self.transitions[(v, k[1])].append(k[0])
-
-
-#  to test
-# c = "*|.ab..abc"
-# w = ERReader(c)
-# a = AFND(list("abc"))
-# a.expression_to_afnd(a.init_state, w, a.end_states[0])
-# a.add_initial_loops()
-# print("Transitions form")
-# print("(state_From, char_readed) -> state_to")
-# for k, v in a.transitions.items():
-#     for d in v:
-#         print("({}, {}) -> {}".format(k[0], str(k[1]), d))
-# print(":::now the reverse AFND")
-# ra = BackwardAFND()
-# ra.backward(a)
-# print("Transitions form")
-# print("(state_From, char_readed) -> state_to")
-# for k, v in ra.transitions.items():
-#     for d in v:
-#         print("({}, {}) -> {}".format(k[0], str(k[1]), d))
-
-# c = "|a..bab"
-# a = AFND(_ALPHABET)
-# w = ERReader(c)
-# a.expression_to_afnd(a.init_state, w, a.end_states[0])
-# a.add_initial_loops()
-# for k, v in a.transitions.items():
-#     for d in v:
-#         print("({}, {}) -> {}".format(k[0], str(k[1]), d))
